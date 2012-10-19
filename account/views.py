@@ -12,6 +12,7 @@ from django.contrib import auth, messages
 from django.contrib.auth.models import User
 from django.contrib.sites.models import get_current_site
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.decorators import login_required
 
 from account import signals
 from account.conf import settings
@@ -695,3 +696,7 @@ class DeleteView(LogoutView):
         ctx.update(kwargs)
         ctx["ACCOUNT_DELETION_EXPUNGE_HOURS"] = settings.ACCOUNT_DELETION_EXPUNGE_HOURS
         return ctx
+    
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(DeleteView, self).dispatch(request, *args, **kwargs)
