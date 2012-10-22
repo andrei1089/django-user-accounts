@@ -1,3 +1,4 @@
+from django.utils.decorators import method_decorator
 from django.http import Http404, HttpResponseForbidden
 from django.core.mail import send_mail
 from django.shortcuts import redirect, get_object_or_404
