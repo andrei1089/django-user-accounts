@@ -2,6 +2,7 @@ import datetime
 import operator
 import urllib
 import logging
+import traceback
 
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
@@ -362,7 +363,7 @@ class AccountDeletion(models.Model):
                 count += 1
             except Exception as e:
                 logger.error("Failed to delete user %s", account_deletion.user)
-                logger.error("%s", e.extract_stack())
+                logger.error("%s", traceback.format_exc())
         return count
     
     @classmethod
