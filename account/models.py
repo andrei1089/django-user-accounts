@@ -24,6 +24,7 @@ from account.managers import EmailAddressManager, EmailConfirmationManager
 from account.signals import signup_code_sent, signup_code_used
 from account.utils import random_token
 
+logger = logging.getLogger(__name__)
 
 class Account(models.Model):
     
@@ -352,11 +353,15 @@ class AccountDeletion(models.Model):
         before = timezone.now() - datetime.timedelta(hours=hours_ago)
         count = 0
         for account_deletion in cls.objects.filter(date_requested__lt=before, user__isnull=False):
-            settings.ACCOUNT_DELETION_EXPUNGE_CALLBACK(account_deletion)
-            account_deletion.date_expunged = timezone.now()
-            account_deletion.user = None
-            account_deletion.save()
-            count += 1
+            try:
+                settings.ACCOUNT_DELETION_EXPUNGE_CALLBACK(account_deletion)
+                account_deletion.date_expunged = timezone.now()
+                account_deletion.user = None
+                account_deletion.save()
+                count += 1
+            except Exception as e:
+                logger.error("Failed to delete user %s", account_deletion.user)
+                logger.error("%s", e.extract_stack())
         return count
     
     @classmethod
