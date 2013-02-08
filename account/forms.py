@@ -38,7 +38,7 @@ class SignupForm(forms.Form):
     
     def clean_username(self):
         if not alnum_re.search(self.cleaned_data["username"]):
-            raise forms.ValidationError(_("Usernames can only contain letters, numbers andthe following special characters ./+/-/_"))
+            raise forms.ValidationError(_("Usernames can only contain letters, numbers and the following special characters ./+/-/_"))
         qs = User.objects.filter(username__iexact=self.cleaned_data["username"])
         if not qs.exists():
             return self.cleaned_data["username"]
