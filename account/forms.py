@@ -4,8 +4,8 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from django.contrib import auth
-from django.contrib.auth.models import User
 
+from account.compat import User
 from account.conf import settings
 from account.models import EmailAddress
 
