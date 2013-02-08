@@ -13,7 +13,6 @@ from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
-import django.conf.settings
 
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sites.models import Site
@@ -30,7 +29,7 @@ from account.utils import random_token
 
 logger = logging.getLogger(__name__)
 
-AUTH_USER_MODEL = getattr(django.conf.settings, 'AUTH_USER_MODEL', 'auth.User')
+AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 class Account(models.Model):
     
