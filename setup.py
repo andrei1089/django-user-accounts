@@ -1,9 +1,11 @@
 from setuptools import setup, find_packages
 
+import account
+
 
 setup(
     name = "django-user-accounts",
-    version = "1.0b7",
+    version = account.__version__,
     author = "Brian Rosner",
     author_email = "brosner@gmail.com",
     description = "a Django user account app",
@@ -13,7 +15,7 @@ setup(
     packages = find_packages(),
     install_requires = [
         "django-appconf==0.5",
-        "pytz==2012d"
+        "pytz==2012j"
     ],
     classifiers = [
         "Development Status :: 4 - Beta",

@@ -38,10 +38,6 @@ class SignupView(FormView):
             "level": messages.INFO,
             "text": _("Confirmation email sent to %(email)s.")
         },
-        "logged_in": {
-            "level": messages.SUCCESS,
-            "text": _("Successfully logged in as %(user)s.")
-        },
         "invalid_signup_code": {
             "level": messages.WARNING,
             "text": _("The code %(code)s is invalid.")
@@ -105,17 +101,18 @@ class SignupView(FormView):
         self.created_user._disable_account_creation = True
         self.created_user.save()
         self.create_account(form)
-        email_kwargs = {
-            "primary": True,
-            "verified": False,
-            "confirm": settings.ACCOUNT_EMAIL_CONFIRMATION_EMAIL,
-        }
+        email_kwargs = {"primary": True, "verified": False}
         if self.signup_code:
             self.signup_code.use(self.created_user)
             if self.signup_code.email and self.created_user.email == self.signup_code.email:
                 email_kwargs["verified"] = True
-        EmailAddress.objects.add_email(self.created_user, self.created_user.email, **email_kwargs)
+                if settings.ACCOUNT_EMAIL_CONFIRMATION_REQUIRED:
+                    self.created_user.is_active = True
+                    self.created_user.save()
+        email_address = EmailAddress.objects.add_email(self.created_user, self.created_user.email, **email_kwargs)
         self.after_signup(form)
+        if settings.ACCOUNT_EMAIL_CONFIRMATION_EMAIL and not email_kwargs["verified"]:
+            email_address.send_confirmation()
         if settings.ACCOUNT_EMAIL_CONFIRMATION_REQUIRED and not email_kwargs["verified"]:
             response_kwargs = {
                 "request": self.request,
@@ -141,14 +138,6 @@ class SignupView(FormView):
                     }
                 )
             self.login_user()
-            if self.messages.get("logged_in"):
-                messages.add_message(
-                    self.request,
-                    self.messages["logged_in"]["level"],
-                    self.messages["logged_in"]["text"] % {
-                        "user": user_display(self.created_user)
-                    }
-                )
         return redirect(self.get_success_url())
     
     def get_success_url(self, fallback_url=None, **kwargs):
@@ -405,7 +394,12 @@ class ChangePasswordView(FormView):
     
     def change_password(self, form):
         user = self.request.user
-        form.save(user)
+        user.set_password(form.cleaned_data["password_new"])
+        user.save()
+    
+    def after_change_password(self):
+        user = self.request.user
+        signals.password_changed.send(sender=ChangePasswordView, user=user)
         if settings.ACCOUNT_NOTIFY_ON_PASSWORD_CHANGE:
             self.send_email(user)
         if self.messages.get("password_changed"):
@@ -414,7 +408,6 @@ class ChangePasswordView(FormView):
                 self.messages["password_changed"]["level"],
                 self.messages["password_changed"]["text"]
             )
-        signals.password_changed.send(sender=ChangePasswordForm, user=user)
     
     def get_form_kwargs(self):
         """
@@ -430,6 +423,7 @@ class ChangePasswordView(FormView):
     
     def form_valid(self, form):
         self.change_password(form)
+        self.after_change_password()
         return redirect(self.get_success_url())
     
     def get_context_data(self, **kwargs):
@@ -544,16 +538,24 @@ class PasswordResetTokenView(FormView):
         })
         return ctx
     
-    def form_valid(self, form):
+    def change_password(self, form):
         user = self.get_user()
         user.set_password(form.cleaned_data["password"])
         user.save()
+    
+    def after_change_password(self):
+        user = self.get_user()
+        signals.password_changed.send(sender=PasswordResetTokenView, user=user)
         if self.messages.get("password_changed"):
             messages.add_message(
                 self.request,
                 self.messages["password_changed"]["level"],
                 self.messages["password_changed"]["text"]
             )
+    
+    def form_valid(self, form):
+        self.change_password(form)
+        self.after_change_password()
         return redirect(self.get_success_url())
     
     def get_redirect_field_name(self):

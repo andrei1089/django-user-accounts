@@ -7,6 +7,7 @@ import pytz
 
 from appconf import AppConf
 
+
 def load_path_attr(path):
     i = path.rfind(".")
     module, attr = path[:i], path[i+1:]
@@ -19,6 +20,7 @@ def load_path_attr(path):
     except AttributeError:
         raise ImproperlyConfigured("Module '%s' does not define a '%s'" % (module, attr))
     return attr
+
 
 class AccountAppConf(AppConf):
     
@@ -54,5 +56,3 @@ class AccountAppConf(AppConf):
     
     def configure_deletion_expunge_callback(self, value):
         return load_path_attr(value)
-
-
