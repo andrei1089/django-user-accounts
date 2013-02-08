@@ -13,6 +13,7 @@ from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings as django_settings
 
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sites.models import Site
