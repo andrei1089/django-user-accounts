@@ -8,14 +8,12 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import Q
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings as django_settings
 
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.sites.models import Site
 
 import pytz
@@ -91,21 +89,6 @@ class Account(models.Model):
             value = pytz.timezone(settings.TIME_ZONE).localize(value)
         return value.astimezone(pytz.timezone(timezone))
 
-
-@receiver(post_save, sender=User)
-def user_post_save(sender, **kwargs):
-    """
-    After User.save is called we check to see if it was a created user. If so,
-    we check if the User object wants account creation. If all passes we
-    create an Account object.
-    
-    We only run on user creation to avoid having to check for existence on
-    each call to User.save.
-    """
-    user, created = kwargs["instance"], kwargs["created"]
-    disabled = getattr(user, "_disable_account_creation", not settings.ACCOUNT_CREATE_ON_SAVE)
-    if created and not disabled:
-        Account.create(user=user)
 
 
 class AnonymousAccount(object):
