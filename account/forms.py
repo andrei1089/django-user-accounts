@@ -10,7 +10,7 @@ from account.conf import settings
 from account.models import EmailAddress
 
 
-alnum_re = re.compile(r"^[\w_\-\.\+]+$")
+alnum_re = re.compile(r"^[\w\-\.\+]+$")
 
 
 class SignupForm(forms.Form):
