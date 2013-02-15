@@ -111,7 +111,7 @@ class LoginEmailForm(LoginForm):
         super(LoginEmailForm, self).__init__(*args, **kwargs)
         self.fields.keyOrder = ["email", "password", "remember"]
 
-class LoginHyrbirdForm(LoginForm):
+class LoginHybridForm(LoginForm):
     
     username = forms.CharField(label=_("Username or Email"))
     authentication_fail_message = _("The username or email address and/or password you specified are not correct.")
