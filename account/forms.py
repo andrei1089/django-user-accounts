@@ -92,7 +92,7 @@ class LoginForm(forms.Form):
 
 class LoginUsernameForm(LoginForm):
     
-    username = forms.CharField(label=_("Username"), max_length=30, help_text=_("Case sensitive."))
+    username = forms.CharField(label=_("Username"), max_length=30)
     authentication_fail_message = _("The username and/or password you specified are not correct.")
     identifier_field = "username"
     
@@ -110,6 +110,16 @@ class LoginEmailForm(LoginForm):
     def __init__(self, *args, **kwargs):
         super(LoginEmailForm, self).__init__(*args, **kwargs)
         self.fields.keyOrder = ["email", "password", "remember"]
+
+class LoginHyrbirdForm(LoginForm):
+    
+    username = forms.CharField(label=_("Username or Email"))
+    authentication_fail_message = _("The username or email address and/or password you specified are not correct.")
+    identifier_field = "username"
+    
+    def __init__(self, *args, **kwargs):
+        super(LoginHyrbirdForm, self).__init__(*args, **kwargs)
+        self.fields.keyOrder = ["username", "password", "remember"]
 
 
 class ChangePasswordForm(forms.Form):
