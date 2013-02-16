@@ -118,7 +118,7 @@ class LoginHybridForm(LoginForm):
     identifier_field = "username"
     
     def __init__(self, *args, **kwargs):
-        super(LoginHyrbirdForm, self).__init__(*args, **kwargs)
+        super(LoginHybridForm, self).__init__(*args, **kwargs)
         self.fields.keyOrder = ["username", "password", "remember"]
 
 
