@@ -1,11 +1,5 @@
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-from account.compat import User
-
 from account.conf import settings
-from .models import Account
 
-@receiver(post_save, sender=User)
 def user_post_save(sender, **kwargs):
     """
     After User.save is called we check to see if it was a created user. If so,
@@ -18,4 +12,5 @@ def user_post_save(sender, **kwargs):
     user, created = kwargs["instance"], kwargs["created"]
     disabled = getattr(user, "_disable_account_creation", not settings.ACCOUNT_CREATE_ON_SAVE)
     if created and not disabled:
+        from account.models import Account
         Account.create(user=user)

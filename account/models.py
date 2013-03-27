@@ -8,6 +8,7 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import Q
+from django.db.models.signals import post_save
 from django.template.loader import render_to_string
 from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
@@ -19,9 +20,11 @@ from django.contrib.sites.models import Site
 import pytz
 
 from account import signals
+from account.compat import User
 from account.conf import settings
 from account.fields import TimeZoneField
 from account.managers import EmailAddressManager, EmailConfirmationManager
+from account.receivers import user_post_save
 from account.signals import signup_code_sent, signup_code_used
 from account.utils import random_token
 
@@ -88,7 +91,7 @@ class Account(models.Model):
         if value.tzinfo is None:
             value = pytz.timezone(settings.TIME_ZONE).localize(value)
         return value.astimezone(pytz.timezone(timezone))
-
+post_save.connect(user_post_save, sender=User)
 
 
 class AnonymousAccount(object):
